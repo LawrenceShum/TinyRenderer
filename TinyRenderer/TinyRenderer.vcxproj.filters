@@ -18,5 +18,13 @@
     <ClCompile Include="main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="tgaimage.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tgaimage.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

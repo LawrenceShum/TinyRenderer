@@ -15,25 +15,31 @@ void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
 	}
 }
 
-void circle(int orient_x, int orient_y, int radius, TGAImage &image, TGAColor color)
+void circle(int orient_x, int orient_y, int radius, TGAImage &image, TGAColor initialColor)
 {
 	int t = 1;
+	TGAColor color;
 	for (int x = (orient_x - radius - 1<0 ? 0:orient_x-radius-1 ); x < (orient_x + radius + 1>500 ? 500:orient_x+radius+1) ; x++)
 	{
 		for (int y = (orient_y - radius - 1<0 ? 0: orient_y-radius-1); y < (orient_y + radius + 1>500 ? 500: orient_y+radius+1); y++)
 		{
 			double distance = sqrt((x-orient_x)*(x-orient_x) + (y-orient_y)*(y-orient_y));
 			double res = (distance - radius)*(distance - radius);
+			//color = TGAColor(0, 0, 0, 255);
 
-			if (res < t)
+
+			if (distance < radius)
+			{
+				color = TGAColor(int((radius-distance)*(255 / radius)), 0, 0, 255);
 				image.set(x, y, color);
+			}
 		}
 	}
 }
 
 int main(int argc, char** argv) {
 	TGAImage image(500, 500, TGAImage::RGB);
-	circle(250, 250, 100, image, green);
+	circle(250, 250, 100, image, white);
 	//line(13, 20, 80, 40, image, red);
 	image.write_tga_file("output.tga"); 
 	return 0;

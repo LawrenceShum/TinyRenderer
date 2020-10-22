@@ -5,19 +5,53 @@
 #include "lodepng.h"
 
 using namespace std;
-
-const TGAColor white = TGAColor(255, 255, 255, 255);
-const TGAColor red = TGAColor(255, 0, 0, 255);
-const TGAColor green = TGAColor(0, 128, 0, 255);
-const TGAColor yellow = TGAColor(255, 255, 0, 255);
-
 Model *model = NULL;
 
-void line(Vec2i t0, Vec2i t1, TGAImage &image, TGAColor color) 
+//输出图像的大小
+unsigned width = 1024, height = 1024;
+
+struct color {
+	int R;
+	int G;
+	int B;
+	int A;
+};
+/*********************************/
+/************定义颜色*************/
+/*********************************/
+color white = { 255,255,255,255 };
+color red = { 255,0,0,255 };
+color green = { 0,128,0,255 };
+color yellow = { 255,255,0,255 };
+
+//设置像素点的着色
+void set_point(vector<unsigned char>& image, int x_i, int y_i, color C)
+{
+	int x = x_i;
+	int y = height - y_i;
+	image[4 * width * y + 4 * x + 0] = C.R;
+	image[4 * width * y + 4 * x + 1] = C.G;
+	image[4 * width * y + 4 * x + 2] = C.B;
+	//image[4 * width * y + 4 * x + 3] = C.A;
+}
+
+void initial(vector<unsigned char>& image)
+{
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			image[4 * y*width + 4 * x + 3] = 255;
+		}
+	}
+}
+
+//画直线
+void line(Vec2i t0, Vec2i t1, vector<unsigned char> &image, color color) 
 {
 	int x0 = t0.x;
-	int x1 = t1.x;
 	int y0 = t0.y;
+	int x1 = t1.x;
 	int y1 = t1.y;
 
 	bool steep = false;
@@ -37,10 +71,12 @@ void line(Vec2i t0, Vec2i t1, TGAImage &image, TGAColor color)
 	int y = y0;
 	for (int x = x0; x <= x1; x++) {
 		if (steep) {
-			image.set(y, x, color);
+			//image.set(y, x, color);
+			set_point(image, y, x, color);
 		}
 		else {
-			image.set(x, y, color);
+			//image.set(x, y, color);
+			set_point(image, x, y, color);
 		}
 		error2 += derror2;
 		if (error2 > dx) {
@@ -50,54 +86,41 @@ void line(Vec2i t0, Vec2i t1, TGAImage &image, TGAColor color)
 	}
 }
 
-void circle(int orient_x, int orient_y, int radius, TGAImage &image, TGAColor initialColor)
+//画圆形
+void circle(int orient_x, int orient_y, int radius, vector<unsigned char> &image, color color)
 {
 	int t = 1;
-	TGAColor color;
-	for (int x = (orient_x - radius - 1<0 ? 0:orient_x-radius-1 ); x < (orient_x + radius + 1>500 ? 500:orient_x+radius+1) ; x++)
+
+	for (int x = (orient_x - radius - 1<0 ? 0:orient_x-radius-1 ); x < (orient_x + radius + 1>width ? width:orient_x+radius+1) ; x++)
 	{
-		for (int y = (orient_y - radius - 1<0 ? 0: orient_y-radius-1); y < (orient_y + radius + 1>500 ? 500: orient_y+radius+1); y++)
+		for (int y = (orient_y - radius - 1<0 ? 0: orient_y-radius-1); y < (orient_y + radius + 1>height ? height: orient_y+radius+1); y++)
 		{
 			double distance = sqrt((x-orient_x)*(x-orient_x) + (y-orient_y)*(y-orient_y));
 			double res = (distance - radius)*(distance - radius);
 			//color = TGAColor(0, 0, 0, 255);
-
-
-			if (distance < radius)
+			//set_point(image, x, y, color);
+			
+			/*if (distance < radius)
 			{
-				color = TGAColor(int((radius-distance)*(255 / radius)), 0, 0, 255);
-				image.set(x, y, color);
+				set_point(image, x, y, color);
+			}*/
+			if (res < t)
+			{
+				set_point(image, x, y, color);
 			}
 		}
 	}
 }
 
-void triangle(Vec2i a, Vec2i b, Vec2i c, TGAImage &image, TGAColor color)
+//画三角形
+void triangle(Vec2i a, Vec2i b, Vec2i c, vector<unsigned char> &image, color color)
 {
 	line(a, b, image, color);
 	line(b, c, image, color);
 	line(c, a, image, color);
 }
 
-/*
-int main(int argc, char** argv) 
-{
-	int width = 800;
-	int height = 800;
-
-	//TGAImage image(width, height, TGAImage::RGB);
-	
-	Vec2i a(200, 250);
-	Vec2i b(700, 470);
-	Vec2i c(550, 680);
-	//triangle(a, b, c, image, red);
-
-	//image.flip_vertically();
-	//image.write_tga_file("output.tga"); 
-	return 0;
-}*/
-
-
+//编码PNG格式的图片
 void encodeOneStep(const char* filename, std::vector<unsigned char>& image, unsigned width, unsigned height) 
 {
 	//Encode the image
@@ -107,23 +130,43 @@ void encodeOneStep(const char* filename, std::vector<unsigned char>& image, unsi
 	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 }
 
+
 int main(int argc, char** argv)
 {
 	const char* filename = argc > 1 ? argv[1] : "test.png";
-
-	unsigned width = 1024, height = 1024;
-
+	
+	if (2 == argc) {
+		model = new Model(argv[1]);
+	}
+	else {
+		model = new Model("obj/african_head.obj");
+	}
+	//这是一张画布
 	std::vector<unsigned char> image;
 
 	image.resize(width * height * 4);
+	//把画布变黑色
+	initial(image);
 
-	for (unsigned y = 0; y < height; y++)
-	
-		for (unsigned x = 0; x < width; x++) {
-		image[4 * width * y + 4 * x + 0] = 255 * !(x & y);
-		image[4 * width * y + 4 * x + 1] = x ^ y;
-		image[4 * width * y + 4 * x + 2] = x | y;
-		image[4 * width * y + 4 * x + 3] = 255;
+	//画obj模型
+	for (int i = 0; i < model->nfaces(); i++)
+	{
+		std::vector<int> face = model->face(i);
+		for (int j = 0; j < 3; j++)
+		{
+			Vec3f v0 = model->vert(face[j]);
+			Vec3f v1 = model->vert(face[(j + 1) % 3]);
+			int x0 = (v0.x + 1.)*width / 2.;
+			int y0 = (v0.y + 1.)*height / 2.;
+			int x1 = (v1.x + 1.)*width / 2.;
+			int y1 = (v1.y + 1.)*height / 2.;
+			Vec2i p0(x0, y0);
+			Vec2i p1(x1, y1);
+			line(p0, p1, image, green);
 		}
+	}
+
+	//circle(500, 500, 200, image, red);
+	
 	encodeOneStep(filename, image, width, height);
 }

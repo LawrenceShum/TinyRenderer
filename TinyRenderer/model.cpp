@@ -1,16 +1,9 @@
 #include <iostream>
-
 #include <string>
-
 #include <fstream>
-
 #include <sstream>
-
 #include <vector>
-
 #include "model.h"
-
-
 
 Model::Model(const char *filename) : verts_(), faces_() {
 
@@ -67,13 +60,9 @@ Model::Model(const char *filename) : verts_(), faces_() {
 
 }
 
-
-
 Model::~Model() {
 
 }
-
-
 
 int Model::nverts() {
 
@@ -81,15 +70,11 @@ int Model::nverts() {
 
 }
 
-
-
 int Model::nfaces() {
 
 	return (int)faces_.size();
 
 }
-
-
 
 std::vector<int> Model::face(int idx) {
 
@@ -97,11 +82,8 @@ std::vector<int> Model::face(int idx) {
 
 }
 
-
-
 Vec3f Model::vert(int i) {
 
 	return verts_[i];
 
 }
-

@@ -1,7 +1,8 @@
 ﻿#include <iostream>
-#include "tgaimage.h"
 #include <cmath>
 #include "model.h"
+#include "tgaimage.h"
+#include "lodepng.h"
 
 using namespace std;
 
@@ -77,57 +78,52 @@ void triangle(Vec2i a, Vec2i b, Vec2i c, TGAImage &image, TGAColor color)
 	line(b, c, image, color);
 	line(c, a, image, color);
 }
+
 /*
-void fillTriangle(Vec2i a, Vec2i b, Vec2i c, TGAImage &image, TGAColor color)
-{
-	int left = min(a.x, b.x, c.x);
-	int right = max(a.x, b.x, c.x);
-	int top = max(a.y, b.y, c.y);
-	int button = min(a.y, b.y, c.y);
-
-	for (int j = button - 1; j <= top + 1; j++)
-	{
-		for (int i = left - 1; i <= right + 1; i++)
-		{
-
-		}
-	}
-}*/
-
 int main(int argc, char** argv) 
 {
 	int width = 800;
 	int height = 800;
-	/*
-	if (2 == argc) 
-	{
-		model = new Model(argv[1]);
-	}
-	else {
-		model = new Model("obj/african_head.obj");
-	}*/
 
-	TGAImage image(width, height, TGAImage::RGB);
-	//circle(250, 250, 100, image, white);
-	//line(400, 350, 80, 40, image, white);
-	/*for (int i = 0; i < model->nfaces(); i++) {
-		std::vector<int> face = model->face(i);
-		for (int j = 0; j < 3; j++) {
-			Vec3f v0 = model->vert(face[j]);
-			Vec3f v1 = model->vert(face[(j + 1) % 3]);
-			int x0 = (v0.x + 1.)*width / 2.;
-			int y0 = (v0.y + 1.)*height / 2.;
-			int x1 = (v1.x + 1.)*width / 2.;
-			int y1 = (v1.y + 1.)*height / 2.;
-			line(x0, y0, x1, y1, image, green);
-		}
-	}*/
+	//TGAImage image(width, height, TGAImage::RGB);
+	
 	Vec2i a(200, 250);
 	Vec2i b(700, 470);
 	Vec2i c(550, 680);
-	triangle(a, b, c, image, red);
+	//triangle(a, b, c, image, red);
 
 	//image.flip_vertically();
-	image.write_tga_file("output.tga"); 
+	//image.write_tga_file("output.tga"); 
 	return 0;
+}*/
+
+
+void encodeOneStep(const char* filename, std::vector<unsigned char>& image, unsigned width, unsigned height) 
+{
+	//Encode the image
+	unsigned error = lodepng::encode(filename, image, width, height);
+
+	//if there's an error, display it
+	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
+}
+
+int main(int argc, char** argv)
+{
+	const char* filename = argc > 1 ? argv[1] : "test.png";
+
+	unsigned width = 1024, height = 1024;
+
+	std::vector<unsigned char> image;
+
+	image.resize(width * height * 4);
+
+	for (unsigned y = 0; y < height; y++)
+	
+		for (unsigned x = 0; x < width; x++) {
+		image[4 * width * y + 4 * x + 0] = 255 * !(x & y);
+		image[4 * width * y + 4 * x + 1] = x ^ y;
+		image[4 * width * y + 4 * x + 2] = x | y;
+		image[4 * width * y + 4 * x + 3] = 255;
+		}
+	encodeOneStep(filename, image, width, height);
 }

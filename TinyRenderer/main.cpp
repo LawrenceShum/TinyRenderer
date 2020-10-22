@@ -77,7 +77,7 @@ void triangle(Vec2i a, Vec2i b, Vec2i c, TGAImage &image, TGAColor color)
 	line(b, c, image, color);
 	line(c, a, image, color);
 }
-
+/*
 void fillTriangle(Vec2i a, Vec2i b, Vec2i c, TGAImage &image, TGAColor color)
 {
 	int left = min(a.x, b.x, c.x);
@@ -92,7 +92,7 @@ void fillTriangle(Vec2i a, Vec2i b, Vec2i c, TGAImage &image, TGAColor color)
 
 		}
 	}
-}
+}*/
 
 int main(int argc, char** argv) 
 {

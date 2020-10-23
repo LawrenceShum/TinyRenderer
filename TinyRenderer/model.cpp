@@ -60,8 +60,8 @@ Model::Model(const char *filename) : verts_(), faces_() {
 
 }
 
-Model::~Model() {
-
+Model::~Model() 
+{
 }
 
 int Model::nverts() {

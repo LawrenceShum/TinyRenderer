@@ -27,6 +27,9 @@
     <ClCompile Include="lodepng.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="read_velocity.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tgaimage.h">
@@ -39,6 +42,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="lodepng.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="read_velocity.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

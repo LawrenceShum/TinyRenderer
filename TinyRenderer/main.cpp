@@ -9,6 +9,8 @@ Model *model = NULL;
 
 //输出图像的大小
 unsigned width = 1024, height = 1024;
+int particle_size = 10000;
+
 
 struct color {
 	int R;
@@ -16,6 +18,13 @@ struct color {
 	int B;
 	int A;
 };
+
+struct position {
+	int x;
+	int y;
+	int z;
+};
+
 /*********************************/
 /************定义颜色*************/
 /*********************************/
@@ -130,7 +139,8 @@ void encodeOneStep(const char* filename, std::vector<unsigned char>& image, unsi
 	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 }
 
-
+//画model
+/*
 int main(int argc, char** argv)
 {
 	const char* filename = argc > 1 ? argv[1] : "test.png";
@@ -141,6 +151,7 @@ int main(int argc, char** argv)
 	else {
 		model = new Model("obj/african_head.obj");
 	}
+
 	//这是一张画布
 	std::vector<unsigned char> image;
 
@@ -164,9 +175,69 @@ int main(int argc, char** argv)
 			Vec2i p1(x1, y1);
 			line(p0, p1, image, green);
 		}
-	}
+	}	
 
 	//circle(500, 500, 200, image, red);
-	
 	encodeOneStep(filename, image, width, height);
+
+	return 0;
+}*/
+
+//计算粒子运动后更新的位置
+void dynamic(vector<Vec2i>& particles, double dt)
+{
+	for (int i = 0; i < particles.size(); i++)
+	{
+		particles[i].x += 10;
+	//	particles[i].y += 10;
+	}
 }
+
+//画流体
+int main(int argc, char** argv)
+{
+	double dt = 1;
+
+	vector<Vec2i> particles;
+	particles.resize(particle_size);
+
+	for (int i = 0; i < 100; i++)
+	{
+		for (int j = 0; j < 100; j++)
+		{
+			particles[j*100+i].x = 200 + j;
+			particles[j*100+i].y = 200 + i;
+		}
+	}
+
+	for (int t = 0; t < 1000; t++)
+	{
+		char p[] = "0000.png";
+		unsigned thousand = (unsigned)(t / 1000);
+		p[0] = (char)('0' + thousand);
+		unsigned hundred = (unsigned)((t - thousand * 1000) / 100);
+		p[1] = (char)('0' + hundred);
+		unsigned ten = (unsigned)((t-thousand*1000-hundred*100)/10);
+		p[2] = (char)('0' + ten);
+		unsigned unit = (unsigned)(t - thousand * 1000 - hundred * 100 - ten * 10);
+		p[3] = (char)('0' + unit);
+ 		//char c = (char)('0' + t);
+		//p[5] = c;
+
+		const char* filename = p;
+		std::vector<unsigned char> image;
+		image.resize(width * height * 4);
+		//把画布变黑色
+		initial(image);
+
+		for (int i = 0; i < particle_size; i++)
+		{
+			set_point(image, particles[i].x, particles[i].y, red);
+		}
+
+		dynamic(particles, dt);
+		
+		encodeOneStep(filename, image, width, height);
+	}
+}
+

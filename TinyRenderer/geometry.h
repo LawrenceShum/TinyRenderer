@@ -106,6 +106,4 @@ template <class t> std::ostream& operator<<(std::ostream& s, Vec3<t>& v) {
 
 }
 
-
-
 #endif //__GEOMETRY_H__
